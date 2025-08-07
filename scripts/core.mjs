@@ -44,7 +44,7 @@ Hooks.on("renderActivitySheet", (app, html, context, options) => {
 
 });
 
-Hooks.on("dnd5e.postUseActivity", (activity, usageConfig, results) => {
+Hooks.on("dnd5e.postUseActivity", async (activity, usageConfig, results) => {
 
     // Check if the activity has effects
     if (!activity.effects || activity.effects.length === 0) {
@@ -64,10 +64,18 @@ Hooks.on("dnd5e.postUseActivity", (activity, usageConfig, results) => {
     const actor = activity.parent.parent.parent;
     for (const effect of effectsToApply) {
         const effectData = effect.toObject();
-        // Set the origin to either the triggering activity or, if there is a concentration effect, that effect's UUID
-        const concentrationEffect = results.effects.find(e => e.statuses.has("concentrating"))?.uuid;
-        effectData.origin = concentrationEffect || activity.uuid; // TODO: Not sure if this is the correct origin
-        actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+        // TODO: create field to optionally tie the effect to concentration (for now it will always be tied to concentration)
+        const concentrationEffect = results.effects.find(e => e.statuses.has("concentrating"));
+        if (concentrationEffect) {
+            effectData.origin = concentrationEffect.uuid;
+            const createdEffect = await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+            let dependentsFlag = concentrationEffect.getFlag("dnd5e", "dependents") || [];
+            dependentsFlag.push({ uuid: createdEffect[0].uuid });
+            await concentrationEffect.setFlag("dnd5e", "dependents", dependentsFlag);
+        } else {
+            effectData.origin = activity.uuid; // TODO: not sure if this is the correct origin
+            await actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
+        }
     }
 
 });
