@@ -64,13 +64,15 @@ Hooks.on("dnd5e.postUseActivity", (activity, usageConfig, results) => {
     const actor = activity.parent.parent.parent;
     for (const effect of effectsToApply) {
         const effectData = effect.toObject();
-        effectData.origin = activity.uuid;
+        // Set the origin to either the triggering activity or, if there is a concentration effect, that effect's UUID
+        const concentrationEffect = results.effects.find(e => e.statuses.has("concentrating"))?.uuid;
+        effectData.origin = concentrationEffect || activity.uuid; // TODO: Not sure if this is the correct origin
         actor.createEmbeddedDocuments("ActiveEffect", [effectData]);
     }
 
 });
 
 // TODO: Remove effect from chat message when applied to self
-// TODO: Put "apply to self" checkbox in the additional settings panel of the activity
+// TODO: Put "apply to self" checkbox in the additional settings panel of the activity or create a new panel with other settings possibly
 
 // TODO: localize
