@@ -5,7 +5,8 @@
     "description": "Extends the activities and effects system from the dnd5e system.",
     "compatibility": {
         "minimum": "13",
-        "verified": "13.345"
+        "verified": "14.360",
+        "maximum": "14"
     },
     "esmodules": ["scripts/core.mjs"],
     "styles": [],

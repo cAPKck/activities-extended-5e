@@ -35,7 +35,7 @@ Hooks.on("renderActivitySheet", (app, html, context, options) => {
 
         const group = foundry.applications.fields.createFormGroup({
             label: "Apply to self",
-            hint: "If this is checked, the effect will apply to the actor itself on activation.",
+            hint: "If this is checked, the effect will apply to the actor using the activity itself.",
             input: checkbox,
         });
 
